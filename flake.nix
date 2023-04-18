@@ -31,7 +31,10 @@
         gemConfig = with pkgs; {
           grpc = attrs: {
             nativeBuildInputs = [ pkg-config ]
-              ++ lib.optional stdenv.isDarwin darwin.cctools;
+              ++ lib.optionals stdenv.isDarwin [
+                darwin.cctools
+                darwin.DarwinTools
+              ];
             buildInputs = [ openssl ];
             hardeningDisable = [ "format" ];
             env.NIX_CFLAGS_COMPILE = toString [
@@ -45,12 +48,15 @@
               "-Wno-error=stringop-truncation"
             ];
             dontBuild = false;
-            dontStrip = stdenv.isDarwin;
+            dontStrip = true;
             postPatch = ''
               substituteInPlace Makefile \
                 --replace '-Wno-invalid-source-encoding' ""
             '' + lib.optionalString stdenv.isDarwin ''
-              # Disable apple_toolchain (to what effect?)
+              # For < v1.48.0
+              substituteInPlace src/ruby/ext/grpc/extconf.rb \
+                --replace "ENV['AR'] = 'libtool -o' if RUBY_PLATFORM =~ /darwin/" ""
+              # For >= v1.48.0
               substituteInPlace src/ruby/ext/grpc/extconf.rb \
                 --replace 'apple_toolchain = ' 'apple_toolchain = false && '
             '';
