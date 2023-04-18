@@ -31,7 +31,7 @@
         gemConfig = with pkgs; {
           grpc = attrs: {
             nativeBuildInputs = [ pkg-config ]
-              ++ lib.optional stdenv.isDarwin cctools;
+              ++ lib.optional stdenv.isDarwin darwin.cctools;
             buildInputs = [ openssl ];
             hardeningDisable = [ "format" ];
             env.NIX_CFLAGS_COMPILE = toString [
