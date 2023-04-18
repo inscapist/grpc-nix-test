@@ -49,7 +49,10 @@
             ];
             dontBuild = false;
             dontStrip = true;
-            postPatch = "";
+            postPatch = ''
+              substituteInPlace Makefile \
+                --replace '-Wno-invalid-source-encoding' ""
+            '' + lib.optionalString stdenv.isDarwin "";
           };
         };
         gemset = import ./gemset.nix;
