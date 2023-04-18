@@ -45,7 +45,14 @@
               "-Wno-error=stringop-truncation"
             ];
             dontBuild = false;
-            postPatch = "";
+            postPatch = ''
+              substituteInPlace Makefile \
+                --replace '-Wno-invalid-source-encoding' ""
+            '' + lib.optionalString stdenv.isDarwin ''
+              # Disable apple_toolchain (to what effect?)
+              substituteInPlace src/ruby/ext/grpc/extconf.rb \
+                --replace 'apple_toolchain = ' 'apple_toolchain = false && '
+            '';
           };
         };
         gemset = import ./gemset.nix;
