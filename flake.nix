@@ -45,6 +45,7 @@
               "-Wno-error=stringop-truncation"
             ];
             dontBuild = false;
+            dontStrip = stdenv.isDarwin;
             postPatch = ''
               substituteInPlace Makefile \
                 --replace '-Wno-invalid-source-encoding' ""
