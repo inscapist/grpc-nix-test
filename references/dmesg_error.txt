@@ -2,3 +2,8 @@
 [198901.659439]: CODE SIGNING: process 59147[ruby]: rejecting invalid page at address 0x10469c000 from offset 0x0 in file "/nix/store/s11ps7wj4rlfcap0jrrf7h5zk5c1lj2l-ruby2.7.6-grpc-1.54.0/lib/ruby/gems/2.7.0/gems/grpc-1.54.0/src/ruby/lib/grpc/grpc_c.bundle" (cs_mtime:1.0 == mtime:1.0) (signed:1 validated:1 tainted:1 nx:0 wpmapped:0 dirty:0 depth:0)
 [198901.659592]: ruby[59147] Corpse allowed 1 of 5
 [198901.818876]: Corpse released, count at 0
+
+=======================
+
+Solution:
+sudo codesign --force --sign - /nix/store/s11ps7wj4rlfcap0jrrf7h5zk5c1lj2l-ruby2.7.6-grpc-1.54.0/lib/ruby/gems/2.7.0/gems/grpc-1.54.0/src/ruby/lib/grpc/grpc_c.bundle
