@@ -1,0 +1,2 @@
+Stripping grpc_c.bundle
+strip: error: symbols referenced by indirect symbol table entries that can't be stripped in: /nix/store/wb8slxb00ylwxz4xls472zf5rbmldvgp-ruby2.7.6-grpc-1.48.0/lib/ruby/gems/2.7.0/gems/grpc-1.48.0/src/ruby/ext/grpc/grpc_c.bundle
