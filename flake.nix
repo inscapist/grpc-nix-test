@@ -49,16 +49,16 @@
               substituteInPlace Makefile \
                 --replace '-Wno-invalid-source-encoding' ""
             '' + lib.optionalString stdenv.isDarwin ''
-              # # For < v1.48.0
-              # substituteInPlace src/ruby/ext/grpc/extconf.rb \
-              #   --replace "ENV['AR'] = 'libtool -o' if RUBY_PLATFORM =~ /darwin/" ""
-              # # For >= v1.48.0
-              # substituteInPlace src/ruby/ext/grpc/extconf.rb \
-              #   --replace 'apple_toolchain = ' 'apple_toolchain = false && '
-
+              # For < v1.48.0
               substituteInPlace src/ruby/ext/grpc/extconf.rb \
-                --replace "ENV['AR'] = 'libtool'" ' ' \
-                --replace "ENV['ARFLAGS'] = '-o'" ' '
+                --replace "ENV['AR'] = 'libtool -o' if RUBY_PLATFORM =~ /darwin/" ""
+              # For >= v1.48.0
+              substituteInPlace src/ruby/ext/grpc/extconf.rb \
+                --replace 'apple_toolchain = ' 'apple_toolchain = false && '
+
+              # address strip issue directly
+              substituteInPlace src/ruby/ext/grpc/extconf.rb \
+                --replace "strip_tool += ' -x' if apple_toolchain" "strip_tool += ' -x'"
             '';
           };
         };
