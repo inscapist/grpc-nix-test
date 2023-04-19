@@ -57,8 +57,11 @@
                 --replace 'apple_toolchain = ' 'apple_toolchain = false && '
 
               # address strip issue directly
+              # substituteInPlace src/ruby/ext/grpc/extconf.rb \
+              #   --replace "strip_tool += ' -x' if apple_toolchain" "strip_tool += ' -x'"
+
               substituteInPlace src/ruby/ext/grpc/extconf.rb \
-                --replace "strip_tool += ' -x' if apple_toolchain" "strip_tool += ' -x'"
+                --replace "if grpc_config == 'opt'" 'if false'
             '';
           };
         };

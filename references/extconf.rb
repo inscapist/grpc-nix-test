@@ -12,23 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require "etc"
-require "mkmf"
+require 'etc'
+require 'mkmf'
 
 windows = RUBY_PLATFORM =~ /mingw|mswin/
 windows_ucrt = RUBY_PLATFORM =~ /(mingw|mswin).*ucrt/
 bsd = RUBY_PLATFORM =~ /bsd/
 darwin = RUBY_PLATFORM =~ /darwin/
 linux = RUBY_PLATFORM =~ /linux/
-cross_compiling = ENV["RCD_HOST_RUBY_VERSION"] # set by rake-compiler-dock in build containers
+cross_compiling = ENV['RCD_HOST_RUBY_VERSION'] # set by rake-compiler-dock in build containers
 # TruffleRuby uses the Sulong LLVM runtime, which is different from Apple's.
-apple_toolchain = darwin && RUBY_ENGINE != "truffleruby"
+apple_toolchain = darwin && RUBY_ENGINE != 'truffleruby'
 
-grpc_root = File.expand_path(File.join(File.dirname(__FILE__), "../../../.."))
+grpc_root = File.expand_path(File.join(File.dirname(__FILE__), '../../../..'))
 
-grpc_config = ENV["GRPC_CONFIG"] || "opt"
+grpc_config = ENV['GRPC_CONFIG'] || 'opt'
 
-ENV["MACOSX_DEPLOYMENT_TARGET"] = "10.10"
+ENV['MACOSX_DEPLOYMENT_TARGET'] = '10.10'
 
 def env_unset?(name)
   ENV[name].nil? || ENV[name].size == 0
@@ -43,78 +43,78 @@ def inherit_rbconfig(name)
 end
 
 def env_append(name, string)
-  ENV[name] ||= ""
-  ENV[name] += " " + string
+  ENV[name] ||= ''
+  ENV[name] += ' ' + string
 end
 
-inherit_rbconfig "AR"
-inherit_rbconfig "CC"
-inherit_rbconfig "CXX"
-inherit_rbconfig "RANLIB"
-inherit_rbconfig "STRIP"
-inherit_rbconfig "CPPFLAGS"
-inherit_rbconfig "LDFLAGS"
+inherit_rbconfig 'AR'
+inherit_rbconfig 'CC'
+inherit_rbconfig 'CXX'
+inherit_rbconfig 'RANLIB'
+inherit_rbconfig 'STRIP'
+inherit_rbconfig 'CPPFLAGS'
+inherit_rbconfig 'LDFLAGS'
 
-ENV["LD"] = ENV["CC"] if env_unset?("LD")
-ENV["LDXX"] = ENV["CXX"] if env_unset?("LDXX")
+ENV['LD'] = ENV['CC'] if env_unset?('LD')
+ENV['LDXX'] = ENV['CXX'] if env_unset?('LDXX')
 
-if RUBY_ENGINE == "truffleruby"
+if RUBY_ENGINE == 'truffleruby'
   # ensure we can find the system's OpenSSL
-  env_append "CPPFLAGS", RbConfig::CONFIG["cppflags"]
+  env_append 'CPPFLAGS', RbConfig::CONFIG['cppflags']
 end
 
 if apple_toolchain && !cross_compiling
-  ENV["AR"] = "libtool"
-  ENV["ARFLAGS"] = "-o"
+  ENV['AR'] = 'libtool'
+  ENV['ARFLAGS'] = '-o'
 end
 
 # Don't embed on TruffleRuby (constant-time crypto is unsafe with Sulong, slow build times)
-ENV["EMBED_OPENSSL"] = (RUBY_ENGINE != "truffleruby").to_s
+ENV['EMBED_OPENSSL'] = (RUBY_ENGINE != 'truffleruby').to_s
 # Don't embed on TruffleRuby (the system zlib is already linked for the zlib C extension, slow build times)
-ENV["EMBED_ZLIB"] = (RUBY_ENGINE != "truffleruby").to_s
+ENV['EMBED_ZLIB'] = (RUBY_ENGINE != 'truffleruby').to_s
 
-ENV["EMBED_CARES"] = "true"
+ENV['EMBED_CARES'] = 'true'
 
-ENV["ARCH_FLAGS"] = RbConfig::CONFIG["ARCH_FLAG"]
+ENV['ARCH_FLAGS'] = RbConfig::CONFIG['ARCH_FLAG']
 if apple_toolchain && !cross_compiling
   if RUBY_PLATFORM =~ /arm64/
-    ENV["ARCH_FLAGS"] = "-arch arm64"
+    ENV['ARCH_FLAGS'] = '-arch arm64'
   else
-    ENV["ARCH_FLAGS"] = "-arch i386 -arch x86_64"
+    ENV['ARCH_FLAGS'] = '-arch i386 -arch x86_64'
   end
 end
 
-env_append "CPPFLAGS", "-DGPR_BACKWARDS_COMPATIBILITY_MODE"
-env_append "CPPFLAGS", '-DGRPC_XDS_USER_AGENT_NAME_SUFFIX="\"RUBY\""'
+env_append 'CPPFLAGS', '-DGPR_BACKWARDS_COMPATIBILITY_MODE'
+env_append 'CPPFLAGS', '-DGRPC_XDS_USER_AGENT_NAME_SUFFIX="\"RUBY\""'
 
-require_relative "../../lib/grpc/version"
-env_append "CPPFLAGS", '-DGRPC_XDS_USER_AGENT_VERSION_SUFFIX="\"' + GRPC::VERSION + '\""'
+require_relative '../../lib/grpc/version'
+env_append 'CPPFLAGS', '-DGRPC_XDS_USER_AGENT_VERSION_SUFFIX="\"' + GRPC::VERSION + '\""'
 
-output_dir = File.expand_path(RbConfig::CONFIG["topdir"])
-grpc_lib_dir = File.join(output_dir, "libs", grpc_config)
-ENV["BUILDDIR"] = output_dir
+output_dir = File.expand_path(RbConfig::CONFIG['topdir'])
+grpc_lib_dir = File.join(output_dir, 'libs', grpc_config)
+ENV['BUILDDIR'] = output_dir
 
 unless windows
-  puts "Building internal gRPC into " + grpc_lib_dir
+  puts 'Building internal gRPC into ' + grpc_lib_dir
   nproc = 4
   nproc = Etc.nprocessors if Etc.respond_to? :nprocessors
-  nproc_override = ENV["GRPC_RUBY_BUILD_PROCS"]
+  nproc_override = ENV['GRPC_RUBY_BUILD_PROCS']
   unless nproc_override.nil? or nproc_override.size == 0
     nproc = nproc_override
     puts "Overriding make parallelism to #{nproc}"
   end
-  make = bsd ? "gmake" : "make"
+  make = bsd ? 'gmake' : 'make'
   cmd = "#{make} -j#{nproc} -C #{grpc_root} #{grpc_lib_dir}/libgrpc.a CONFIG=#{grpc_config} Q="
   puts "Building grpc native library: #{cmd}"
   system(cmd)
   exit 1 unless $? == 0
 end
 
-$CFLAGS << " -DGRPC_RUBY_WINDOWS_UCRT" if windows_ucrt
-$CFLAGS << " -I" + File.join(grpc_root, "include")
+$CFLAGS << ' -DGRPC_RUBY_WINDOWS_UCRT' if windows_ucrt
+$CFLAGS << ' -I' + File.join(grpc_root, 'include')
 
 def have_ruby_abi_version()
-  return true if RUBY_ENGINE == "truffleruby"
+  return true if RUBY_ENGINE == 'truffleruby'
   # ruby_abi_version is only available in development versions: https://github.com/ruby/ruby/pull/6231
   return false if RUBY_PATCHLEVEL >= 0
 
@@ -134,69 +134,69 @@ def have_ruby_abi_version()
 end
 
 def ext_export_filename()
-  name = "ext-export"
-  name += "-truffleruby" if RUBY_ENGINE == "truffleruby"
-  name += "-with-ruby-abi-version" if have_ruby_abi_version()
+  name = 'ext-export'
+  name += '-truffleruby' if RUBY_ENGINE == 'truffleruby'
+  name += '-with-ruby-abi-version' if have_ruby_abi_version()
   name
 end
 
-ext_export_file = File.join(grpc_root, "src", "ruby", "ext", "grpc", ext_export_filename())
+ext_export_file = File.join(grpc_root, 'src', 'ruby', 'ext', 'grpc', ext_export_filename())
 $LDFLAGS << ' -Wl,--version-script="' + ext_export_file + '.gcc"' if linux
 $LDFLAGS << ' -Wl,-exported_symbols_list,"' + ext_export_file + '.clang"' if apple_toolchain
 
-$LDFLAGS << " " + File.join(grpc_lib_dir, "libgrpc.a") unless windows
-if grpc_config == "gcov"
-  $CFLAGS << " -O0 -fprofile-arcs -ftest-coverage"
-  $LDFLAGS << " -fprofile-arcs -ftest-coverage -rdynamic"
+$LDFLAGS << ' ' + File.join(grpc_lib_dir, 'libgrpc.a') unless windows
+if grpc_config == 'gcov'
+  $CFLAGS << ' -O0 -fprofile-arcs -ftest-coverage'
+  $LDFLAGS << ' -fprofile-arcs -ftest-coverage -rdynamic'
 end
 
-if grpc_config == "dbg"
-  $CFLAGS << " -O0 -ggdb3"
+if grpc_config == 'dbg'
+  $CFLAGS << ' -O0 -ggdb3'
 end
 
-$LDFLAGS << " -Wl,-wrap,memcpy" if linux
+$LDFLAGS << ' -Wl,-wrap,memcpy' if linux
 # Do not statically link standard libraries on TruffleRuby as this does not work when compiling to bitcode
-if linux && RUBY_ENGINE != "truffleruby"
-  $LDFLAGS << " -static-libgcc -static-libstdc++"
+if linux && RUBY_ENGINE != 'truffleruby'
+  $LDFLAGS << ' -static-libgcc -static-libstdc++'
 end
-$LDFLAGS << " -static" if windows
+$LDFLAGS << ' -static' if windows
 
-$CFLAGS << " -std=c11 "
-$CFLAGS << " -Wall "
-$CFLAGS << " -Wextra "
-$CFLAGS << " -pedantic "
+$CFLAGS << ' -std=c11 '
+$CFLAGS << ' -Wall '
+$CFLAGS << ' -Wextra '
+$CFLAGS << ' -pedantic '
 
-output = File.join("grpc", "grpc_c")
-puts "Generating Makefile for " + output
+output = File.join('grpc', 'grpc_c')
+puts 'Generating Makefile for ' + output
 create_makefile(output)
 
-strip_tool = RbConfig::CONFIG["STRIP"]
-strip_tool += " -x" if apple_toolchain
+strip_tool = RbConfig::CONFIG['STRIP']
+strip_tool += ' -x' if apple_toolchain
 
-if grpc_config == "opt"
-  File.open("Makefile.new", "w") do |o|
-    o.puts "hijack: all strip"
+if grpc_config == 'opt'
+  File.open('Makefile.new', 'w') do |o|
+    o.puts 'hijack: all strip'
     o.puts
-    File.foreach("Makefile") do |i|
+    File.foreach('Makefile') do |i|
       o.puts i
     end
     o.puts
-    o.puts "strip: $(DLLIB)"
+    o.puts 'strip: $(DLLIB)'
     o.puts "\t$(ECHO) Stripping $(DLLIB)"
     o.puts "\t$(Q) #{strip_tool} $(DLLIB)"
   end
-  File.rename("Makefile.new", "Makefile")
+  File.rename('Makefile.new', 'Makefile')
 end
-if ENV["GRPC_RUBY_TEST_ONLY_WORKAROUND_MAKE_INSTALL_BUG"]
+if ENV['GRPC_RUBY_TEST_ONLY_WORKAROUND_MAKE_INSTALL_BUG']
   # Note: this env var setting is intended to work around a problem observed
   # with the ginstall command on grpc's macos automated test infrastructure,
   # and is not  guaranteed to work in the wild.
   # Also see https://github.com/rake-compiler/rake-compiler/issues/210.
-  puts "Overriding the generated Makefile install target to use cp"
-  File.open("Makefile.new", "w") do |o|
-    File.foreach("Makefile") do |i|
-      if i.start_with?("INSTALL_PROG = ")
-        override = "INSTALL_PROG = cp"
+  puts 'Overriding the generated Makefile install target to use cp'
+  File.open('Makefile.new', 'w') do |o|
+    File.foreach('Makefile') do |i|
+      if i.start_with?('INSTALL_PROG = ')
+        override = 'INSTALL_PROG = cp'
         puts "Replacing generated Makefile line: |#{i}|, with: |#{override}|"
         o.puts override
       else
@@ -204,5 +204,5 @@ if ENV["GRPC_RUBY_TEST_ONLY_WORKAROUND_MAKE_INSTALL_BUG"]
       end
     end
   end
-  File.rename("Makefile.new", "Makefile")
+  File.rename('Makefile.new', 'Makefile')
 end
