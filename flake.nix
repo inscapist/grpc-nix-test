@@ -33,7 +33,7 @@
             nativeBuildInputs = [ pkg-config ]
               ++ lib.optionals stdenv.isDarwin [
                 darwin.cctools
-                darwin.sig_tool
+                darwin.sigtool
               ];
             buildInputs = [ openssl ];
             hardeningDisable = [ "format" ];
@@ -61,8 +61,9 @@
                 --replace 'hijack: all strip' 'hijack: all'
             '';
             postInstall = lib.optionalString stdenv.isDarwin ''
-              codesign --force --sign - $out/lib/ruby/gems/${ruby.gemPath}/gems/grpc-${attrs.version}/src/ruby/lib/grpc/grpc_c.bundle
+              codesign --force --sign - $out/lib/ruby/gems/2.7.0/gems/grpc-${attrs.version}/src/ruby/lib/grpc/grpc_c.bundle
             '';
+
           };
         };
         gemset = import ./gemset.nix;
