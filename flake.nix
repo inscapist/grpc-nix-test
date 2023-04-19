@@ -61,6 +61,7 @@
                 --replace 'hijack: all strip' 'hijack: all'
             '';
             postInstall = lib.optionalString stdenv.isDarwin ''
+              xasdas
               codesign --force --sign - $out/lib/ruby/gems/2.7.0/gems/grpc-${attrs.version}/src/ruby/lib/grpc/grpc_c.bundle
             '';
 
