@@ -49,12 +49,16 @@
               substituteInPlace Makefile \
                 --replace '-Wno-invalid-source-encoding' ""
             '' + lib.optionalString stdenv.isDarwin ''
-              # For < v1.48.0
+              # # For < v1.48.0
+              # substituteInPlace src/ruby/ext/grpc/extconf.rb \
+              #   --replace "ENV['AR'] = 'libtool -o' if RUBY_PLATFORM =~ /darwin/" ""
+              # # For >= v1.48.0
+              # substituteInPlace src/ruby/ext/grpc/extconf.rb \
+              #   --replace 'apple_toolchain = ' 'apple_toolchain = false && '
+
               substituteInPlace src/ruby/ext/grpc/extconf.rb \
-                --replace "ENV['AR'] = 'libtool -o' if RUBY_PLATFORM =~ /darwin/" ""
-              # For >= v1.48.0
-              substituteInPlace src/ruby/ext/grpc/extconf.rb \
-                --replace 'apple_toolchain = ' 'apple_toolchain = false && '
+                --replace 'ENV["AR"] = "libtool"' ' ' \
+                --replace 'ENV["ARFLAGS"] = "-o"' ' ' \
             '';
           };
         };
