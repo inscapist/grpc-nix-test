@@ -31,10 +31,7 @@
         gemConfig = with pkgs; {
           grpc = attrs: {
             nativeBuildInputs = [ pkg-config ]
-              ++ lib.optionals stdenv.isDarwin [
-                darwin.cctools
-                darwin.DarwinTools
-              ];
+              ++ lib.optional stdenv.isDarwin darwin.cctools;
             buildInputs = [ openssl ];
             hardeningDisable = [ "format" ];
             env.NIX_CFLAGS_COMPILE = toString [
@@ -48,7 +45,6 @@
               "-Wno-error=stringop-truncation"
             ];
             dontBuild = false;
-            dontStrip = true;
             postPatch = ''
               substituteInPlace Makefile \
                 --replace '-Wno-invalid-source-encoding' ""

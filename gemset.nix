@@ -238,26 +238,26 @@
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "0kj4j1g6l9v92k3byqyfq2kmawy12cj898daxqn1jsw0b458k0dh";
+      sha256 = "19a21w38dxnvsyc76pimilqnwrh5gkcr8dl810mzr771fsk8ja78";
       target = "ruby";
       type = "gem";
     };
     targets = [{
       remotes = ["https://rubygems.org"];
-      sha256 = "0djiay0aav3703xkipdzzdzlqy3payw4r56q6af5ybf46c09wi9r";
-      target = "x86_64-darwin";
-      targetCPU = "x86_64";
-      targetOS = "darwin";
-      type = "gem";
-    } {
-      remotes = ["https://rubygems.org"];
-      sha256 = "0gvjm32rsbs7d05ysacndq10a9j2ik24q6nfa5bmqm5xipibfk89";
+      sha256 = "0q7v854v6r9yqx55cbk2aganjvxicsxyadlvyg1a9cm5ygayz48a";
       target = "x86_64-linux";
       targetCPU = "x86_64";
       targetOS = "linux";
       type = "gem";
+    } {
+      remotes = ["https://rubygems.org"];
+      sha256 = "0rf6nfzv4gq2a8k2y8rz8jv1lfxch2l9rfngzhgy445y1ckwnqid";
+      target = "x86_64-darwin";
+      targetCPU = "x86_64";
+      targetOS = "darwin";
+      type = "gem";
     }];
-    version = "1.53.0";
+    version = "1.48.0";
   };
   jwt = {
     groups = ["default"];
