@@ -57,8 +57,8 @@
               #   --replace 'apple_toolchain = ' 'apple_toolchain = false && '
 
               substituteInPlace src/ruby/ext/grpc/extconf.rb \
-                --replace 'ENV["AR"] = "libtool"' ' ' \
-                --replace 'ENV["ARFLAGS"] = "-o"' ' ' \
+                --replace "ENV['AR'] = 'libtool'" ' ' \
+                --replace "ENV['ARFLAGS'] = '-o'" ' '
             '';
           };
         };
